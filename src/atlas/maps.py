@@ -9,7 +9,7 @@ It is an approximation of the real boundaries, labeled as such on every map.
 from __future__ import annotations
 
 import numpy as np
-from matplotlib.patches import PathPatch, Polygon
+from matplotlib.patches import PathPatch, Polygon, Rectangle
 from matplotlib.path import Path
 from scipy.spatial import Voronoi
 
@@ -43,3 +43,30 @@ def draw_cells(ax, cells, colors, outline_xy, edgecolor="white", linewidth=0.4):
     ax.set_ylim(y.min() - 10, y.max() + 10)
     ax.set_aspect("equal")
     ax.axis("off")
+
+
+def add_north_arrow(ax, x=0.93, y=0.93, length=0.08):
+    """North arrow in axes-fraction coordinates (maps here are drawn north-up)."""
+    ax.annotate("", xy=(x, y), xytext=(x, y - length), xycoords="axes fraction",
+                arrowprops=dict(facecolor="black", edgecolor="black", width=3, headwidth=10, headlength=10))
+    ax.text(x, y + 0.012, "N", transform=ax.transAxes, ha="center", va="bottom", fontsize=12, fontweight="bold")
+
+
+def add_scale_bar(ax, length_km=100, segments=2, x=None, y=None, height=None, unit="km", y_frac=0.04):
+    """Alternating black/white scale bar in data units (kilometres).
+
+    By default it sits at the right edge of the current axes limits, ``y_frac``
+    of the way up.
+    """
+    x0, x1 = ax.get_xlim()
+    y0, y1 = ax.get_ylim()
+    height = height if height is not None else (y1 - y0) * 0.012
+    x = x if x is not None else x1 - length_km - (x1 - x0) * 0.04
+    y = y if y is not None else y0 + (y1 - y0) * y_frac
+    step = length_km / segments
+    for i in range(segments):
+        ax.add_patch(Rectangle((x + i * step, y), step, height, facecolor="black" if i % 2 == 0 else "white",
+                               edgecolor="black", linewidth=0.8, zorder=5))
+    for i in range(segments + 1):
+        label = f"{i * step:g}" + (f" {unit}" if i == segments else "")
+        ax.text(x + i * step, y + height * 1.8, label, ha="center", va="bottom", fontsize=8, zorder=5)

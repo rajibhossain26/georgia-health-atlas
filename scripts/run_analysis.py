@@ -89,6 +89,8 @@ def main():
     ]:
         norm = Normalize(df[col].min(), df[col].max())
         maps.draw_cells(ax, cells, plt.get_cmap(cmap)(norm(df[col])), outline)
+        maps.add_north_arrow(ax)
+        maps.add_scale_bar(ax, length_km=100, y_frac=0.74)
         ax.set_title(title, fontsize=13)
         sm = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
         fig.colorbar(sm, ax=ax, shrink=0.6, orientation="horizontal", pad=0.02)
@@ -101,6 +103,8 @@ def main():
     fig, ax = plt.subplots(figsize=(6.4, 8.0), constrained_layout=True)
     fig.get_layout_engine().set(rect=(0, 0.04, 1, 0.96))
     maps.draw_cells(ax, cells, [LISA_COLORS[c] for c in df["cluster"]], outline)
+    maps.add_north_arrow(ax)
+    maps.add_scale_bar(ax, length_km=100, y_frac=0.74)
     ax.set_title("Chronic disease burden: local clusters\n(local Moran's I, p < 0.05)", fontsize=13)
     present = [k for k in LISA_COLORS if (df["cluster"] == k).any()]
     ax.legend(handles=[Patch(color=LISA_COLORS[k], label=f"{k} ({(df['cluster'] == k).sum()})") for k in present],
